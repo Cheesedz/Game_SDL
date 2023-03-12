@@ -1,39 +1,39 @@
-﻿#pragma once
+#pragma once
 
 #include "CommonFunction.h"
 
-//Lớp chuyên xử lí hình ảnh
-class BaseObject
+//Texture wrapper class
+class LTexture
 {
 public:
-	//Constructor
-	BaseObject();
+    //Initializes variables
+    LTexture();
 
-	//Destructor
-	~BaseObject();
+    //Deallocates memory
+    ~LTexture();
 
-	//Khởi tạo thông số cho rect
-	void SetRect(const int& x, const int& y) {
-		rect_.x = x;
-		rect_.y = y;
-	}
+    //Loads image at specified path
+    bool loadFromFile(std::string path);
 
-	//Xuất ra rect
-	SDL_Rect GetRect() const { return rect_;}
+    //Deallocates texture
+    void free();
 
-	//Xuất p_object_
-	SDL_Texture* GetObject() const { return p_object_; }
+    //Renders texture at given point
+    void render(int x, int y);
 
-	//Load ảnh bitmap lên p_object_
-	bool LoadImage(std::string path, SDL_Renderer* screen);
+    //Gets image dimensions
+    int getWidth();
+    int getHeight();
 
-	void Render(SDL_Renderer* des, const SDL_Rect* clip = NULL);
-	void Free();
+private:
+    //The actual hardware texture
+    SDL_Texture* mTexture;
 
-protected:
-	//Lưu trữ hình ảnh
-	SDL_Texture* p_object_;
-
-	//Lưu trữ kích thước
-	SDL_Rect rect_;
+    //Image dimensions
+    int mWidth;
+    int mHeight;
 };
+
+//Scene textures
+LTexture gKnightTexture;
+LTexture gBackgroundTexture;
