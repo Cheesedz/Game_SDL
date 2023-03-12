@@ -1,50 +1,87 @@
-//#include "stdafx.h"
+#include <iostream>
 #include "BaseObject.h"
 
-BaseObject::BaseObject()
+
+LTexture::LTexture()
 {
-	p_object_ = NULL;
-	rect_.x = 0;
-	rect_.y = 0;
-	rect_.w = 0;
-	rect_.h = 0;
-	Free();
+	//Initialize
+	mTexture = NULL;
+	mWidth = 0;
+	mHeight = 0;
 }
 
-bool BaseObject::LoadImage(std::string path, SDL_Renderer* screen)
+LTexture::~LTexture()
 {
-	SDL_Texture* new_texture = NULL;
-	SDL_Surface* load_surface = IMG_Load(path.c_str());
-	if (load_surface != NULL)
+	//Deallocate
+	free();
+}
+
+bool LTexture::loadFromFile(std::string path)
+{
+	//Get rid of preexisting texture
+	free();
+
+	//The final texture
+	SDL_Texture* newTexture = NULL;
+
+	//Load image at specified path
+	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
+	if (loadedSurface == NULL)
 	{
-		SDL_SetColorKey(load_surface, SDL_TRUE, SDL_MapRGB(load_surface->format, COLOR_KEY_R, COLOR_KEY_G, COLOR_KEY_B));
-		new_texture = SDL_CreateTextureFromSurface(screen, load_surface);
-		if (new_texture != NULL)
+		std::cout <<"Unable to load image " << path.c_str() << "! SDL_image Error : " << IMG_GetError() << std::endl;
+	}
+	else
+	{
+		//Color key image
+		SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0, 0xFF, 0xFF));
+
+		//Create texture from surface pixels
+		newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
+		if (newTexture == NULL)
 		{
-			rect_.w = load_surface->w;
-			rect_.h = load_surface->h;
+			printf("Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
 		}
-		SDL_FreeSurface(load_surface);
+		else
+		{
+			//Get image dimensions
+			mWidth = loadedSurface->w;
+			mHeight = loadedSurface->h;
+		}
+
+		//Get rid of old loaded surface
+		SDL_FreeSurface(loadedSurface);
 	}
 
-	p_object_ = new_texture;
-
-	return p_object_ != NULL;
+	//Return success
+	mTexture = newTexture;
+	return mTexture != NULL;
 }
 
-void BaseObject::Render(SDL_Renderer* des, const SDL_Rect* clip)
+void LTexture::render(int x, int y)
 {
-	SDL_Rect renderquad = { rect_.x, rect_.y, rect_.w, rect_.h };
-	SDL_RenderCopy(des, p_object_, clip, &renderquad);
+	//Set rendering space and render to screen
+	SDL_Rect renderQuad = { x, y, mWidth, mHeight };
+	SDL_RenderCopy(gRenderer, mTexture, NULL, &renderQuad);
 }
 
-void BaseObject::Free()
+void LTexture::free()
 {
-	if (p_object_ != NULL)
+	//Free texture if it exists
+	if (mTexture != NULL)
 	{
-		SDL_DestroyTexture(p_object_);
-		p_object_ = NULL;
-		rect_.w = 0;
-		rect_.h = 0;
+		SDL_DestroyTexture(mTexture);
+		mTexture = NULL;
+		mWidth = 0;
+		mHeight = 0;
 	}
+}
+
+int LTexture::getWidth()
+{
+	return mWidth;
+}
+
+int LTexture::getHeight()
+{
+	return mHeight;
 }
