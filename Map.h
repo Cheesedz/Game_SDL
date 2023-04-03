@@ -1,21 +1,33 @@
 #pragma once
-#include "RenderGame.hpp"
 
-class Map
+#include "CommonFunction.h"
+#include "BaseObject.h"
+
+#define MAX_TILES 20
+
+class TileMap : public BaseObject
 {
 public:
-	Map();
-	~Map();
+	TileMap() { ; }
+	~TileMap() { ; }
+};
 
-	void loadMap(int arr[20][25]);
+class GameMap
+{
+public: 
+	GameMap() { ; }
+	~GameMap() { ; }
 
-	void drawMap();
+	void LoadMap(char* name);
 
+	void LoadTiles(SDL_Renderer* screen);
+
+	void Drawmap(SDL_Renderer* screen);
+
+	Map getMap() { return gameMap; };
+
+	void SetMap(Map& mapData) { gameMap = mapData;  };
 private:
-	SDL_Rect src, dest;
-	SDL_Texture* brick;
-	SDL_Texture* can;
-	SDL_Texture* heart;
-
-	int map[20][25];
+	Map gameMap;
+	TileMap tile_map[MAX_TILES];
 };
