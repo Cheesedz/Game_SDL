@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 //Các thư viện thường dùng để xử lí game
 #include <Windows.h>
@@ -8,6 +8,7 @@
 #include <SDL_mixer.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <vector>
 
 //Cửa sổ game
  static SDL_Window* gWindow = NULL;
@@ -61,3 +62,9 @@ typedef struct Input
 	int down;
 	int jump;
 };
+
+
+namespace SDLCommonFunction
+{
+	bool checkCollision(const SDL_Rect& object1, const SDL_Rect& object2);
+}
