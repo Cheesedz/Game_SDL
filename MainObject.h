@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <vector>
 #include "CommonFunction.h"
@@ -15,7 +15,7 @@ public:
 
 	void Show(SDL_Renderer* des);
 
-	void HandleInputEvent(SDL_Event events, SDL_Renderer* screen);
+	void HandleInputEvent(SDL_Event events, SDL_Renderer* screen, Mix_Chunk* gFire);
 
 	void SetClips();
 
@@ -27,22 +27,50 @@ public:
 	
 	void CenterEntityOnMap(Map& mapData);
 
-	void setBulletList(std::vector<Bullet*> bulletList)
+	void setBulletList(const std::vector<Bullet*> bulletList)
 	{
 		bullet_list = bulletList;
 	}
 	std::vector <Bullet*> getBulletList() const { return bullet_list; }
 
+	void RemoveBulletList(/*std::vector<Bullet*> bullet_list*/);
+
 	void HandleBullet(SDL_Renderer* des);
+
+	void RemoveBullet(const int& index);
+
+	int get_width_frame() { return width_frame; }
+
+	int get_height_frame() { return height_frame; }
+
+	void setRespawnTime(const int& respawn_time) { respawnTime = respawn_time; }
+
+	bool increaseEnergy() const { return increase_energy; }
+
+	int getEnergy() const { return energy_count; }
+
+
+
+	SDL_Rect getRectFrame();
 
 	enum WalkType
 	{
 		WALK_RIGHT = 1,
 		WALK_LEFT = 0,
 		IDLE = 0,
+		JUMP = 0,
+		FALL = 0,
 	};
 
 private:
+	int PLAYER_JUMP_SPEED;
+
+	int PLAYER_RUN_SPEED;
+
+	int energy_count;
+
+	bool increase_energy;
+
 	std::vector<Bullet*> bullet_list;
 
 	double x_val;
@@ -59,7 +87,7 @@ private:
 	//Lưu trạng thái khung hình
 	Input input_type;
 
-	int frame;
+	long frame;
 
 	int status;
 
