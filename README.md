@@ -9,7 +9,7 @@
 ## Description
 
 ### General
-- You have to control the character, survive and defeat all the enimies along the way to the goal in the limited time to win.
+- You have to control the character, survive and defeat all the enemies along the way to the goal in the limited time to win.
 
 ![win](https://user-images.githubusercontent.com/113958111/233001997-144cd4b5-a649-4e83-b8c6-cba49e398ea6.png)
 
@@ -35,13 +35,16 @@
 ### How to make a game in C++ & SDL from scratch
 - https://www.youtube.com/@CarlBirch/featured
 
+### LazyFoo Beginning Game Programming v2.0
+- https://lazyfoo.net/tutorials/SDL/index.php
+
 ## Installation
 
-Download [here] (https:)
+Download [here](https://drive.google.com/file/d/1Wi80ZeMcAZWQevPSUWBnUByhOPqunS-D/view?usp=share_link) to try it.
 
 ## Instructor
 - Dr. Le Quang Hieu
-- PhD. Kieu Hai Dang
+- MS. Kieu Hai Dang
 
 ## Contributing
-- All the contributions are always wellcome. Don't use this project for any commercial purposes.
+- All the contributions are always welcome. Don't use this project for any commercial purposes.
