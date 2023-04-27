@@ -21,7 +21,7 @@ public:
 
 	void ShowEndScreen(SDL_Renderer* des);
 
-	void HandleMainMenu(SDL_Event events);
+	void HandleMainMenu(SDL_Event events, Mix_Chunk* gOption);
 
 	void HandleGameMode(SDL_Event events);
 
@@ -38,6 +38,8 @@ public:
 	bool isWin() ;
 
 	int getGameTime() const { return gameTime; }
+
+	int getEnemyNum() const { return enemyNum; }
 
 private:
 	SDL_Texture* p_object;
@@ -56,4 +58,5 @@ private:
 	bool win;
 	int status;
 	int gameTime;
+	int enemyNum;
 };
