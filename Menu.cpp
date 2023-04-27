@@ -1,5 +1,5 @@
 #include "Menu.h"
-#include "Timer.h"
+#include "SoundEffect.h"
 
 Menu::Menu()
 {
@@ -18,6 +18,7 @@ Menu::Menu()
 	win = false;
 	status = 0;
 	gameTime = MODE_EASY;
+	enemyNum = 40;
 }
 
 Menu::~Menu()
@@ -75,97 +76,6 @@ void Menu::ShowMainMenu(SDL_Renderer* des)
 		SDL_Delay(15000);
 	}
 
-	//switch (choose % 3)
-	//{
-	//case START_GAME:
-	//	{
-	//		if (esc == 1 || win)
-	//		{
-	//			LoadImg("menu//mainmenu1.png", des);
-	//		}
-
-	//		if (enter == 1) startGame = true;
-	//	}
-	//	break;
-	//case GAME_MODE:
-	//	{
-	//		LoadImg("menu//mainmenu2.png", des);
-	//		if (enterMode == 1)
-	//		{
-	//			LoadImg("menu//mode_easy.png", des);
-	//			/*status = GAME_MODE;*/
-	//
-	//			if (input_type.up == 1)
-	//			{
-	//				selectMode--;
-	//			}
-	//			else if (input_type.down == 1)
-	//			{
-	//				selectMode++;
-	//			}
-	//			if (select
-	//		}
-	//		if (selectMode % 3 == 2)
-	//		{
-	//			LoadImg("menu//mode_normal.png", des);
-	//			if (input_type.up == 1)
-	//			{
-	//				selectMode--;
-	//			}
-	//			else if (input_type.down == 1)
-	//			{
-	//				selectMode++;
-	//			}
-	//		}
-	//		if (selectMode % 3 == 0)
-	//		{
-	//			LoadImg("menu//mode_hard.png", des);
-	//			if (input_type.up == 1)
-	//			{
-	//				selectMode--;
-	//			}
-	//			else if (input_type.down == 1)
-	//			{
-	//				selectMode++;
-	//			}
-	//		}
-	//		if (selectMode % 3 == 1 && enter == 1)
-	//		{
-	//			gameTime = MODE_EASY;
-	//			choose = 1;
-	//			break;
-	//		}
-	//		if (selectMode % 3 == 2 && enter == 1)
-	//		{
-	//			gameTime = MODE_NORMAL;
-	//			choose = 1;
-	//			break;
-	//		}
-	//		if (selectMode % 3 == 0 && enter == 1)
-	//		{
-	//			gameTime = MODE_HARD;
-	//			choose = 1;
-	//			break;
-	//		}
-	//	}
-	//	break;
-	//case HOW_TO_PLAY:
-	//	{
-	//		LoadImg("menu//mainmenu3.png", des);
-	//		if (enter == 1)
-	//		{
-	//			LoadImg("menu//how to play.png", des);
-	//		}
-	//		if (esc == 1)
-	//		{
-	//			choose = 1;
-	//			break;
-	//		}
-	//	}
-	//	break;
-	//}
-	
-
 	if (choose%3 == START_GAME || esc == 1 || win == true)
 	{
 		LoadImg("menu//mainmenu1.png",des);
@@ -173,6 +83,7 @@ void Menu::ShowMainMenu(SDL_Renderer* des)
 	if (choose % 3 == START_GAME && enter == 1)
 	{
 		startGame = true;
+		/*startGame = false;*/
 	}
 
 	if (choose % 3 == GAME_MODE)
@@ -208,6 +119,7 @@ void Menu::ShowMainMenu(SDL_Renderer* des)
 				if (getInMode == 1)
 				{
 					gameTime = MODE_NORMAL;
+					enemyNum = 80;
 					esc = 1;
 					enterMode = 0;
 					getInMode = 0;
@@ -219,6 +131,7 @@ void Menu::ShowMainMenu(SDL_Renderer* des)
 				if (getInMode == 1)
 				{
 					gameTime = MODE_HARD;
+					enemyNum = 120;
 					esc = 1;
 					enterMode = 0;
 					getInMode = 0;
@@ -226,28 +139,6 @@ void Menu::ShowMainMenu(SDL_Renderer* des)
 			}
 		}
 	}
-	
-	//if (choose % 3 == GAME_MODE && enter == 1)
-	//{
-	//	LoadImg("menu//mode_easy.png", des);
-	//	status = GAME_MODE;
-	//	/*gameTime = MODE_EASY;*/
-	//	choose = 1;
-	//}
-
-	//if (status == GAME_MODE && choose % 3 == 2 /*&& enter == 1*/)
-	//{
-	//	LoadImg("menu//mode_normal.png", des);
-	//	/*gameTime = MODE_NORMAL;*/
-	//}
-
-
-	//if (status == GAME_MODE && choose % 3 == 0 /*&& enter == 1*/)
-	//{
-	//	LoadImg("menu//mode_hard.png", des);
-	//	/*gameTime = MODE_HARD;
-	//	esc = 1;*/
-	//}
 
 	if (choose % 3 == HOW_TO_PLAY)
 	{
@@ -279,14 +170,19 @@ void Menu::ShowMainMenu(SDL_Renderer* des)
 	Render(des);
 }
 
-void Menu::HandleMainMenu(SDL_Event events)
+void Menu::HandleMainMenu(SDL_Event events, Mix_Chunk* gOption)
 {
+	if (gOption == NULL)
+	{
+		gOption = Mix_LoadWAV("sound effect//opt.wav");
+	}
 	if (events.type == SDL_KEYDOWN)
 	{
 		switch (events.key.keysym.sym)
 		{
 		case SDLK_UP:
 		{
+			Mix_PlayChannel(-1, gOption, 0);
 			input_type.up = 1;
 			input_type.down = 0;
 			if (status != GAME_MODE)
@@ -303,6 +199,7 @@ void Menu::HandleMainMenu(SDL_Event events)
 
 		case SDLK_DOWN:
 		{
+			Mix_PlayChannel(-1, gOption, 0);
 			input_type.up = 0;
 			input_type.down = 1;
 			if (status != GAME_MODE)
@@ -317,7 +214,9 @@ void Menu::HandleMainMenu(SDL_Event events)
 		}
 		break;
 
-		case SDLK_SPACE:
+		case SDLK_KP_ENTER:
+			gOption = Mix_LoadWAV("sound effect//choose.wav");
+			Mix_PlayChannel(-1, gOption, 0);
 			if (enterMode == 1) getInMode = 1;
 			if (status == GAME_MODE) enterMode = 1;
 			/*if (status == GAME_OVER) enterGameOver = 1;*/
@@ -325,6 +224,7 @@ void Menu::HandleMainMenu(SDL_Event events)
 		break;
 
 		case SDLK_ESCAPE:
+			Mix_PlayChannel(-1, gOption, 0);
 			esc = 1;
 			enter = 0;
 			enterMode = 0;
@@ -425,7 +325,7 @@ void Menu::HandleEndScreen(SDL_Event events)
 		}
 		break;
 
-		case SDLK_SPACE:
+		case SDLK_KP_ENTER:
 			enterGameOver = 1;
 			break;
 
