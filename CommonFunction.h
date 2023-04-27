@@ -38,7 +38,7 @@ const int RENDER_DRAW_COLOR = 0xff;
 const int FPS = 24;
 
 #define TILE_SIZE 32
-#define MAX_MAP_X 50
+#define MAX_MAP_X 400
 #define MAX_MAP_Y 20
 #define BLANK_TILE 0
 
