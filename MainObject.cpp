@@ -1,17 +1,18 @@
 #include "MainObject.h"
-#include "Timer.h"
+#include "Energy.h"
 
-#define GRAVITY 1.2
+#define GRAVITY 0.7
 #define MAX_FALL_SPEED 10
-#define PLAYER_RUN_SPEED 15
-#define PLAYER_JUMP_SPEED 15
-#define HEART 3
-#define ENERGY 2
+#define RUN_SPELL 7
+#define JUMP_SPELL 6
 #define SPIKE 4
 #define SPIKE_INVERSE 99
 
 MainObject::MainObject()
 {
+	PLAYER_JUMP_SPEED = 15;
+	PLAYER_RUN_SPEED = 15;
+	increase_energy = false;
 	frame = 0;
 	x_pos = 0;
 	y_pos = 0;
@@ -30,15 +31,13 @@ MainObject::MainObject()
 	respawnTime = 0;
 }
 
-int cooldown = 0;
+int coolDownFire = 0;
+int coolDownJump = 0;
+int coolDownRun = 0;
 
 MainObject :: ~MainObject()
 {
-
-}
-void MainObject::increaseEnergy()
-{
-	energy_count++;
+	Free();
 }
 
 bool MainObject::LoadImg(std::string path, SDL_Renderer* screen)
@@ -77,27 +76,27 @@ void MainObject::SetClips()
 		frame_clip[1].w = width_frame;
 		frame_clip[1].h = height_frame;
 
-		frame_clip[2].x = 2*width_frame;
+		frame_clip[2].x = 2 * width_frame;
 		frame_clip[2].y = 0;
 		frame_clip[2].w = width_frame;
 		frame_clip[2].h = height_frame;
 
-		frame_clip[3].x = 3*width_frame;
+		frame_clip[3].x = 3 * width_frame;
 		frame_clip[3].y = 0;
 		frame_clip[3].w = width_frame;
 		frame_clip[3].h = height_frame;
 
-		frame_clip[4].x = 4*width_frame;
+		frame_clip[4].x = 4 * width_frame;
 		frame_clip[4].y = 0;
 		frame_clip[4].w = width_frame;
 		frame_clip[4].h = height_frame;
 
-		frame_clip[5].x = 5*width_frame;
+		frame_clip[5].x = 5 * width_frame;
 		frame_clip[5].y = 0;
 		frame_clip[5].w = width_frame;
 		frame_clip[5].h = height_frame;
 
-		frame_clip[6].x =6* width_frame;
+		frame_clip[6].x = 6 * width_frame;
 		frame_clip[6].y = 0;
 		frame_clip[6].w = width_frame;
 		frame_clip[6].h = height_frame;
@@ -149,8 +148,12 @@ void MainObject::Show(SDL_Renderer* des)
 
 }
 
-void MainObject::HandleInputEvent(SDL_Event events, SDL_Renderer* screen)
+void MainObject::HandleInputEvent(SDL_Event events, SDL_Renderer* screen, Mix_Chunk* gFire)
 {
+	if (gFire == NULL)
+	{
+		gFire = Mix_LoadWAV("sound effect//fire.wav");
+	}
 	if (events.type == SDL_KEYDOWN)
 	{
 		switch (events.key.keysym.sym)
@@ -162,6 +165,15 @@ void MainObject::HandleInputEvent(SDL_Event events, SDL_Renderer* screen)
 			input_type.left = 0;
 			input_type.jump = 0;
 			input_type.down = 0;
+			if (PLAYER_RUN_SPEED == 25)
+			{
+				coolDownRun++;
+				if (coolDownRun > 50) coolDownRun = 0;
+				if (coolDownRun == 0)
+				{
+					PLAYER_RUN_SPEED = 15;
+				}
+			}
 		}
 		break;
 
@@ -172,6 +184,15 @@ void MainObject::HandleInputEvent(SDL_Event events, SDL_Renderer* screen)
 			input_type.right = 0;
 			input_type.jump = 0;
 			input_type.down = 0;
+			if (PLAYER_RUN_SPEED == 25)
+			{
+				coolDownRun++;
+				if (coolDownRun > 50) coolDownRun = 0;
+				if (coolDownRun == 0)
+				{
+					PLAYER_RUN_SPEED = 15;
+				}
+			}
 		}
 		break;
 
@@ -180,27 +201,36 @@ void MainObject::HandleInputEvent(SDL_Event events, SDL_Renderer* screen)
 			/*status = JUMP;*/
 			/*input_type.down = 0;*/
 			input_type.jump = 1;
-			
+			if (PLAYER_JUMP_SPEED == 25)
+			{
+				coolDownJump++;
+				if (coolDownJump > 5) coolDownJump = 0;
+				if (coolDownJump == 0)
+				{
+					PLAYER_JUMP_SPEED = 15;
+				}
+			}
 		}
 		break;
 		
 		case SDLK_j:
 		{
-			cooldown++;
-			if (cooldown > 3) cooldown = 0;
-			if (cooldown == 0)
+			Mix_PlayChannel(-1, gFire, 0);
+			coolDownFire++;
+			if (coolDownFire > 1) coolDownFire = 0;
+			if (coolDownFire == 0)
 			{
 				Bullet* bullet = new Bullet();
 
 				if (status == WALK_LEFT)
 				{
-					bullet->LoadImg("res//blade_left.png", screen);
+					bullet->LoadImg("res//bullet_left.png", screen);
 					bullet->setBulletDirect(Bullet::DIR_LEFT);
 					bullet->SetRect(this->rect.x, rect.y + height_frame * 0.2);
 				}
 				else
 				{
-					bullet->LoadImg("res//blade_right.png", screen);
+					bullet->LoadImg("res//bullet_right.png", screen);
 					bullet->setBulletDirect(Bullet::DIR_RIGHT);
 					bullet->SetRect(this->rect.x + width_frame - 20, rect.y + height_frame * 0.2);
 				}
@@ -215,6 +245,9 @@ void MainObject::HandleInputEvent(SDL_Event events, SDL_Renderer* screen)
 		}
 		
 		break;
+
+		case SDLK_ESCAPE:
+			SDL_Quit();
 
 		default:
 			break;
@@ -274,6 +307,14 @@ void MainObject::HandleBullet(SDL_Renderer* des)
 	}
 }
 
+void MainObject::RemoveBulletList(/*std::vector<Bullet*> bullet_list*/)
+{
+	for (int i = 0; i < bullet_list.size(); i++)
+	{
+		bullet_list.at(i) = NULL;
+	}
+}
+
 void MainObject::RemoveBullet(const int& index)
 {
 	int size = bullet_list.size();
@@ -295,7 +336,7 @@ void MainObject::actionPlayer(Map& mapData)
 	if (respawnTime == 0)
 	{
 		x_val = 0;
-		y_val += 0.7;
+		y_val += GRAVITY;
 
 		if (y_val >= MAX_FALL_SPEED)
 		{
@@ -395,17 +436,18 @@ void MainObject::checkMap(Map& mapData)
 			int val1 = mapData.tile[y1][x2];
 			int val2 = mapData.tile[y2][x2];
 
-			if (val1 == HEART || val2 == HEART)
+			if (val1 == RUN_SPELL || val2 == RUN_SPELL)
 			{
 				mapData.tile[y1][x2] = 0;
 				mapData.tile[y2][x2] = 0;
+				PLAYER_RUN_SPEED = 25;
 			}
 
-			if (val1 == ENERGY || val2 == ENERGY)
+			if (val1 == JUMP_SPELL || val2 == JUMP_SPELL)
 			{
 				mapData.tile[y1][x2] = 0;
 				mapData.tile[y2][x2] = 0;
-				increaseEnergy();
+				PLAYER_JUMP_SPEED = 25;
 			}
 
 			if ((val1 != BLANK_TILE && val1 != SPIKE && val1 != SPIKE_INVERSE)|| (val2 != BLANK_TILE && val2 != SPIKE && val2 != SPIKE_INVERSE ))
@@ -420,17 +462,18 @@ void MainObject::checkMap(Map& mapData)
 			int val1 = mapData.tile[y1][x1];
 			int val2 = mapData.tile[y2][x1];
 
-			if (val1 == HEART || val2 == HEART)
+			if (val1 == RUN_SPELL || val2 == RUN_SPELL)
 			{
 				mapData.tile[y1][x1] = 0;
 				mapData.tile[y2][x1] = 0;
+				PLAYER_RUN_SPEED = 25;
 			}
 
-			if (val1 == ENERGY || val2 == ENERGY)
+			if (val1 == JUMP_SPELL || val2 == JUMP_SPELL)
 			{
 				mapData.tile[y1][x2] = 0;
 				mapData.tile[y2][x2] = 0;
-				increaseEnergy();
+				PLAYER_JUMP_SPEED = 25;
 			}
 
 			if ((val1 != BLANK_TILE && val1 != SPIKE && val1 != SPIKE_INVERSE ) || (val2 != BLANK_TILE && val2 != SPIKE && val2 != SPIKE_INVERSE ))
@@ -456,17 +499,18 @@ void MainObject::checkMap(Map& mapData)
 			int val1 = mapData.tile[y2][x1];
 			int val2 = mapData.tile[y2][x2];
 
-			if (val1 == HEART || val2 == HEART)
+			if (val1 == RUN_SPELL || val2 == RUN_SPELL)
 			{
 				mapData.tile[y2][x1] = 0;
 				mapData.tile[y2][x2] = 0;
+				PLAYER_RUN_SPEED = 25;
 			}
 
-			if (val1 == ENERGY || val2 == ENERGY)
+			if (val1 == JUMP_SPELL || val2 == JUMP_SPELL)
 			{
 				mapData.tile[y1][x2] = 0;
 				mapData.tile[y2][x2] = 0;
-				increaseEnergy();
+				PLAYER_JUMP_SPEED = 25;
 			}
 
 			if ((val1 != BLANK_TILE && val1 != SPIKE && val1 != SPIKE_INVERSE ) || (val2 != BLANK_TILE && val2 != SPIKE && val2 != SPIKE_INVERSE ))
@@ -485,17 +529,18 @@ void MainObject::checkMap(Map& mapData)
 			int val1 = mapData.tile[y1][x1];
 			int val2 = mapData.tile[y1][x2];
 
-			if (val1 == HEART || val2 == HEART)
+			if (val1 == RUN_SPELL || val2 == RUN_SPELL)
 			{
 				mapData.tile[y1][x1] = 0;
 				mapData.tile[y1][x2] = 0;
+				PLAYER_RUN_SPEED = 25;
 			}
 
-			if (val1 == ENERGY || val2 == ENERGY)
+			if (val1 == JUMP_SPELL || val2 == JUMP_SPELL)
 			{
 				mapData.tile[y1][x2] = 0;
 				mapData.tile[y2][x2] = 0;
-				increaseEnergy();
+				PLAYER_JUMP_SPEED = 25;
 			}
 
 			if ((val1 != BLANK_TILE && val1 != SPIKE && val1 != SPIKE_INVERSE ) || (val2 != BLANK_TILE && val2 != SPIKE && val2 != SPIKE_INVERSE ))
